@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Parmak Seçme Oyunu</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            font-family: system-ui, -apple-system, sans-serif;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            min-height: 100vh;
+            margin: 0;
+            padding: 10px;
+            touch-action: manipulation;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .game-container {
+            max-width: 800px;
+            width: 100%;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 15px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+
+        .game-area {
+            width: 100%;
+            height: 400px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 2px dashed rgba(255, 255, 255, 0.3);
+            border-radius: 15px;
+            position: relative;
+            margin: 15px 0;
+            cursor: pointer;
+            overflow: hidden;
+            touch-action: none;
+        }
+
+        .finger {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            position: absolute;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            font-weight: bold;
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            user-select: none;
+            touch-action: none;
+        }
+
+        .finger.winner {
+            transform: scale(1.5);
+            animation: winnerPulse 1s infinite alternate;
+            z-index: 10;
+        }
+
+        .finger.loser {
+            transform: scale(0.7);
+            opacity: 0.3;
+            filter: grayscale(100%);
+        }
+
+        @keyframes winnerPulse {
+            0% {
+                box-shadow: 0 0 20px 10px rgba(255, 215, 0, 0.5);
+            }
+            100% {
+                box-shadow: 0 0 40px 20px rgba(255, 215, 0, 0.8);
+            }
+        }
+
+        .winner-text {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 24px;
+            font-weight: bold;
+            color: #FFD700;
+            text-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+            pointer-events: none;
+        }
+
+        .controls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            justify-content: center;
+            align-items: center;
+            padding: 8px;
+        }
+
+        .button {
+            padding: 10px 20px;
+            border-radius: 10px;
+            font-weight: bold;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border: none;
+            outline: none;
+            min-width: 120px;
+            white-space: nowrap;
+        }
+
+        .button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .button-primary {
+            background: linear-gradient(45deg, #00b09b, #96c93d);
+            color: white;
+        }
+
+        .button-danger {
+            background: linear-gradient(45deg, #ff416c, #ff4b2b);
+            color: white;
+        }
+
+        .select-box {
+            padding: 10px 15px;
+            border-radius: 10px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            font-size: 16px;
+            outline: none;
+            min-width: 120px;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='white'%3e%3cpath d='M7 10l5 5 5-5z'/%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: right 10px center;
+            background-size: 20px;
+            padding-right: 35px;
+        }
+
+        .select-box option {
+            background: #2a5298;
+            color: white;
+        }
+
+        .message {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 10px 20px;
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            border-radius: 8px;
+            font-size: 14px;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            pointer-events: none;
+        }
+
+        .message.show {
+            opacity: 1;
+        }
+
+        .status-text {
+            text-align: center;
+            color: white;
+            font-size: 18px;
+            margin: 10px 0;
+            min-height: 27px;
+        }
+
+        .winner-numbers {
+            color: #FFD700;
+            font-weight: bold;
+            text-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
+        }
+
+        @media (max-width: 640px) {
+            .game-container {
+                padding: 10px;
+                border-radius: 15px;
+            }
+
+            .game-area {
+                height: 50vh;
+                min-height: 250px;
+            }
+
+            .finger {
+                width: 50px;
+                height: 50px;
+                font-size: 20px;
+            }
+
+            .button {
+                padding: 12px 20px;
+                font-size: 16px;
+                min-width: 140px;
+            }
+
+            .select-box {
+                padding: 12px 20px;
+                font-size: 16px;
+                min-width: 140px;
+            }
+
+            h1 {
+                font-size: 24px !important;
+            }
+        }
+    </style>
+</head>
+<body class="flex items-center justify-center">
+    <div class="game-container">
+        <h1 class="text-3xl font-bold text-white text-center mb-4">Parmak Seçme Oyunu</h1>
+        
+        <div class="controls">
+            <select id="winnerCount" class="select-box">
+                <option value="1">1 Kazanan</option>
+                <option value="2">2 Kazanan</option>
+                <option value="3">3 Kazanan</option>
+                <option value="4">4 Kazanan</option>
+                <option value="5">5 Kazanan</option>
+            </select>
+            
+            <button id="startButton" class="button button-primary">
+                Seçimi Başlat
+            </button>
+            
+            <button id="resetButton" class="button button-danger">
+                Sıfırla
+            </button>
+        </div>
+
+        <div id="gameArea" class="game-area"></div>
+        
+        <div class="status-text">
+            Parmak Sayısı: <span id="fingerCount" class="font-bold">0</span>
+            <span id="winnerInfo" class="winner-numbers"></span>
+        </div>
+    </div>
+
+    <div id="message" class="message"></div>
+
+    <script>
+        const gameArea = document.getElementById('gameArea');
+        const startButton = document.getElementById('startButton');
+        const resetButton = document.getElementById('resetButton');
+        const winnerCount = document.getElementById('winnerCount');
+        const fingerCount = document.getElementById('fingerCount');
+        const message = document.getElementById('message');
+
+        let fingers = [];
+        let isSelecting = false;
+        let animationFrame = null;
+
+        const colors = [
+            '#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FFEEAD',
+            '#D4A5A5', '#9B59B6', '#3498DB', '#E67E22', '#2ECC71'
+        ];
+
+        function showMessage(text, duration = 2000) {
+            message.textContent = text;
+            message.classList.add('show');
+            setTimeout(() => message.classList.remove('show'), duration);
+        }
+
+        function createFinger(x, y) {
+            const finger = document.createElement('div');
+            finger.className = 'finger';
+            finger.style.left = `${x - 22.5}px`;
+            finger.style.top = `${y - 22.5}px`;
+            finger.style.backgroundColor = colors[fingers.length % colors.length];
+            finger.textContent = fingers.length + 1;
+            gameArea.appendChild(finger);
+            fingers.push(finger);
+            fingerCount.textContent = fingers.length;
+            return finger;
+        }
+
+        function resetGame() {
+            fingers.forEach(finger => finger.remove());
+            fingers = [];
+            fingerCount.textContent = '0';
+            document.getElementById('winnerInfo').textContent = '';
+            isSelecting = false;
+            startButton.disabled = false;
+            if (animationFrame) {
+                cancelAnimationFrame(animationFrame);
+                animationFrame = null;
+            }
+        }
+
+        function selectWinners() {
+            const numWinners = parseInt(winnerCount.value);
+            if (numWinners > fingers.length) {
+                showMessage('Kazanan sayısı parmak sayısından fazla olamaz!');
+                return;
+            }
+
+            isSelecting = true;
+            startButton.disabled = true;
+            let currentIndex = 0;
+            let lastTime = 0;
+            let startTime = null;
+            const SELECTION_DURATION = 5000; // 5 saniye
+
+            function animate(time) {
+                if (!startTime) startTime = time;
+                const elapsed = time - startTime;
+                const progress = Math.min(elapsed / SELECTION_DURATION, 1);
+                
+                if (!lastTime) lastTime = time;
+                const delta = time - lastTime;
+
+                // Hızı progress'e göre ayarla (başta hızlı, sonda yavaş)
+                const speed = 50 + (200 - 50) * progress;
+
+                if (delta > speed) {
+                    fingers.forEach(f => f.classList.remove('winner', 'loser'));
+                    fingers[currentIndex].classList.add('winner');
+                    currentIndex = (currentIndex + 1) % fingers.length;
+                    lastTime = time;
+                }
+
+                if (progress < 1) {
+                    animationFrame = requestAnimationFrame(animate);
+                } else {
+                    const winners = [];
+                    while (winners.length < numWinners) {
+                        const index = Math.floor(Math.random() * fingers.length);
+                        if (!winners.includes(index)) {
+                            winners.push(index);
+                        }
+                    }
+
+                    // Kazanan numaralarını göster
+                    const winnerInfo = document.getElementById('winnerInfo');
+                    const winnerNumbers = winners.map(index => index + 1).sort((a, b) => a - b);
+                    winnerInfo.textContent = ` | Kazananlar: ${winnerNumbers.join(', ')}`;
+
+                    fingers.forEach((finger, index) => {
+                        if (winners.includes(index)) {
+                            finger.classList.add('winner');
+                            const winnerText = document.createElement('div');
+                            winnerText.className = 'winner-text';
+                            winnerText.textContent = 'Kazanan!';
+                            finger.appendChild(winnerText);
+                        } else {
+                            finger.classList.add('loser');
+                        }
+                    });
+                }
+            }
+
+            animationFrame = requestAnimationFrame(animate);
+        }
+
+        // Hem tıklama hem dokunma olaylarını ekle
+        gameArea.addEventListener('click', handleInteraction);
+        gameArea.addEventListener('touchstart', handleInteraction, { passive: false });
+        gameArea.addEventListener('touchmove', handleInteraction, { passive: false });
+
+        function handleInteraction(e) {
+            if (isSelecting) {
+                e.preventDefault();
+                return;
+            }
+
+            let x, y;
+            
+            if (e.type === 'click') {
+                x = e.clientX;
+                y = e.clientY;
+            } else {
+                e.preventDefault();
+                const touch = e.touches[0];
+                x = touch.clientX;
+                y = touch.clientY;
+            }
+
+            const rect = gameArea.getBoundingClientRect();
+            const relativeX = x - rect.left;
+            const relativeY = y - rect.top;
+
+            // Parmak ekleme işlemini sadece boş alana tıklandığında yap
+            if (!e.target.classList.contains('finger')) {
+                createFinger(relativeX, relativeY);
+            }
+        }
+
+        startButton.addEventListener('click', () => {
+            if (fingers.length === 0) {
+                showMessage('Lütfen önce parmak ekleyin!');
+                return;
+            }
+            selectWinners();
+        });
+
+        resetButton.addEventListener('click', resetGame);
+    </script>
+</body>
+</html> 
