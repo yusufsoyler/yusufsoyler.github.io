@@ -6,14 +6,29 @@
     <title>Parmak Seçme Oyunu</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
+        :root {
+            --bg-gradient: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            --bg-gradient-dark: linear-gradient(135deg, #0f1b2e 0%, #1a2332 100%);
+            --bg-gradient-light: linear-gradient(135deg, #e0f2fe 0%, #bae6fd 100%);
+        }
+
         body {
             font-family: system-ui, -apple-system, sans-serif;
-            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            background: var(--bg-gradient);
             min-height: 100vh;
             margin: 0;
             padding: 10px;
             touch-action: manipulation;
             -webkit-tap-highlight-color: transparent;
+            transition: background 0.3s ease;
+        }
+
+        body.light-theme {
+            background: var(--bg-gradient-light);
+        }
+
+        body.dark-theme {
+            background: var(--bg-gradient-dark);
         }
 
         .game-container {
@@ -25,6 +40,41 @@
             border-radius: 20px;
             padding: 15px;
             box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        body.light-theme .game-container {
+            background: rgba(255, 255, 255, 0.8);
+        }
+
+        body.dark-theme .game-container {
+            background: rgba(0, 0, 0, 0.3);
+        }
+
+        .menu-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .menu-button {
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-weight: bold;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+        }
+
+        .menu-button:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
         }
 
         .game-area {
@@ -38,6 +88,11 @@
             cursor: pointer;
             overflow: hidden;
             touch-action: none;
+        }
+
+        body.light-theme .game-area {
+            background: rgba(0, 0, 0, 0.05);
+            border-color: rgba(0, 0, 0, 0.2);
         }
 
         .finger {
@@ -56,6 +111,21 @@
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
             user-select: none;
             touch-action: none;
+            animation: fingerPop 0.3s ease;
+        }
+
+        @keyframes fingerPop {
+            0% {
+                transform: scale(0);
+                opacity: 0;
+            }
+            50% {
+                transform: scale(1.2);
+            }
+            100% {
+                transform: scale(1);
+                opacity: 1;
+            }
         }
 
         .finger.winner {
@@ -128,6 +198,16 @@
             color: white;
         }
 
+        .button-secondary {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+        }
+
+        .button-success {
+            background: linear-gradient(45deg, #f093fb, #f5576c);
+            color: white;
+        }
+
         .select-box {
             padding: 10px 15px;
             border-radius: 10px;
@@ -165,6 +245,7 @@
             opacity: 0;
             transition: opacity 0.3s ease;
             pointer-events: none;
+            z-index: 1000;
         }
 
         .message.show {
@@ -179,10 +260,200 @@
             min-height: 27px;
         }
 
+        body.light-theme .status-text {
+            color: #1e3c72;
+        }
+
         .winner-numbers {
             color: #FFD700;
             font-weight: bold;
             text-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
+        }
+
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(5px);
+        }
+
+        .modal.show {
+            display: flex;
+        }
+
+        .modal-content {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 25px;
+            max-width: 500px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+        }
+
+        body.dark-theme .modal-content {
+            background: rgba(30, 30, 30, 0.95);
+            color: white;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: #666;
+        }
+
+        .stat-item {
+            padding: 10px;
+            margin: 5px 0;
+            background: rgba(0, 0, 0, 0.05);
+            border-radius: 8px;
+        }
+
+        body.dark-theme .stat-item {
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .history-item {
+            padding: 10px;
+            margin: 5px 0;
+            background: rgba(0, 0, 0, 0.05);
+            border-radius: 8px;
+            border-left: 4px solid #4ECDC4;
+        }
+
+        body.dark-theme .history-item {
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        /* Toggle Switch */
+        .toggle-switch {
+            position: relative;
+            display: inline-block;
+            width: 50px;
+            height: 24px;
+        }
+
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .toggle-slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+            border-radius: 24px;
+        }
+
+        .toggle-slider:before {
+            position: absolute;
+            content: "";
+            height: 18px;
+            width: 18px;
+            left: 3px;
+            bottom: 3px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+
+        input:checked + .toggle-slider {
+            background-color: #4ECDC4;
+        }
+
+        input:checked + .toggle-slider:before {
+            transform: translateX(26px);
+        }
+
+        /* Confetti */
+        .confetti {
+            position: fixed;
+            width: 10px;
+            height: 10px;
+            background: #f0f;
+            position: absolute;
+            left: 50%;
+            animation: confetti-fall 3s linear forwards;
+            z-index: 1500;
+        }
+
+        @keyframes confetti-fall {
+            to {
+                transform: translateY(100vh) rotate(360deg);
+                opacity: 0;
+            }
+        }
+
+        /* Settings Panel */
+        .settings-panel {
+            display: none;
+            margin-top: 15px;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            backdrop-filter: blur(5px);
+        }
+
+        .settings-panel.show {
+            display: block;
+        }
+
+        body.light-theme .settings-panel {
+            background: rgba(0, 0, 0, 0.05);
+        }
+
+        .setting-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        body.light-theme .setting-item {
+            border-bottom-color: rgba(0, 0, 0, 0.1);
+        }
+
+        .setting-label {
+            color: white;
+            font-weight: 500;
+        }
+
+        body.light-theme .setting-label {
+            color: #1e3c72;
+        }
+
+        h1 {
+            color: white;
+            text-align: center;
+        }
+
+        body.light-theme h1 {
+            color: #1e3c72;
         }
 
         @media (max-width: 640px) {
@@ -222,7 +493,46 @@
 </head>
 <body class="flex items-center justify-center">
     <div class="game-container">
-        <h1 class="text-3xl font-bold text-white text-center mb-4">Parmak Seçme Oyunu</h1>
+        <div class="menu-bar">
+            <h1 class="text-3xl font-bold text-white m-0">Parmak Seçme Oyunu</h1>
+            <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                <button id="settingsButton" class="menu-button">⚙️ Ayarlar</button>
+                <button id="statsButton" class="menu-button">📊 İstatistikler</button>
+                <button id="historyButton" class="menu-button">📜 Geçmiş</button>
+            </div>
+        </div>
+
+        <div id="settingsPanel" class="settings-panel">
+            <div class="setting-item">
+                <span class="setting-label">Ses Efektleri</span>
+                <label class="toggle-switch">
+                    <input type="checkbox" id="soundToggle" checked>
+                    <span class="toggle-slider"></span>
+                </label>
+            </div>
+            <div class="setting-item">
+                <span class="setting-label">Konfeti Efekti</span>
+                <label class="toggle-switch">
+                    <input type="checkbox" id="confettiToggle" checked>
+                    <span class="toggle-slider"></span>
+                </label>
+            </div>
+            <div class="setting-item">
+                <span class="setting-label">Karanlık Tema</span>
+                <label class="toggle-switch">
+                    <input type="checkbox" id="themeToggle">
+                    <span class="toggle-slider"></span>
+                </label>
+            </div>
+            <div class="setting-item">
+                <span class="setting-label">Animasyon Hızı</span>
+                <select id="speedSelect" class="select-box" style="min-width: 100px;">
+                    <option value="2000">Hızlı (2s)</option>
+                    <option value="5000" selected>Normal (5s)</option>
+                    <option value="8000">Yavaş (8s)</option>
+                </select>
+            </div>
+        </div>
         
         <div class="controls">
             <select id="winnerCount" class="select-box">
@@ -237,8 +547,16 @@
                 Seçimi Başlat
             </button>
             
+            <button id="undoButton" class="button button-secondary">
+                ↶ Geri Al
+            </button>
+            
             <button id="resetButton" class="button button-danger">
                 Sıfırla
+            </button>
+
+            <button id="shareButton" class="button button-success">
+                📤 Paylaş
             </button>
         </div>
 
@@ -252,22 +570,129 @@
 
     <div id="message" class="message"></div>
 
+    <!-- Stats Modal -->
+    <div id="statsModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 style="margin: 0;">📊 İstatistikler</h2>
+                <button class="modal-close" onclick="closeModal('statsModal')">&times;</button>
+            </div>
+            <div id="statsContent"></div>
+        </div>
+    </div>
+
+    <!-- History Modal -->
+    <div id="historyModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 style="margin: 0;">📜 Geçmiş</h2>
+                <button class="modal-close" onclick="closeModal('historyModal')">&times;</button>
+            </div>
+            <div id="historyContent"></div>
+        </div>
+    </div>
+
     <script>
         const gameArea = document.getElementById('gameArea');
         const startButton = document.getElementById('startButton');
         const resetButton = document.getElementById('resetButton');
+        const undoButton = document.getElementById('undoButton');
+        const shareButton = document.getElementById('shareButton');
         const winnerCount = document.getElementById('winnerCount');
         const fingerCount = document.getElementById('fingerCount');
         const message = document.getElementById('message');
+        const settingsButton = document.getElementById('settingsButton');
+        const settingsPanel = document.getElementById('settingsPanel');
+        const statsButton = document.getElementById('statsButton');
+        const historyButton = document.getElementById('historyButton');
+        const soundToggle = document.getElementById('soundToggle');
+        const confettiToggle = document.getElementById('confettiToggle');
+        const themeToggle = document.getElementById('themeToggle');
+        const speedSelect = document.getElementById('speedSelect');
 
         let fingers = [];
         let isSelecting = false;
         let animationFrame = null;
+        let fingerHistory = [];
+        let stats = JSON.parse(localStorage.getItem('fingerGameStats')) || {
+            totalGames: 0,
+            totalFingers: 0,
+            fingerWins: {}
+        };
+        let gameHistory = JSON.parse(localStorage.getItem('fingerGameHistory')) || [];
 
         const colors = [
             '#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FFEEAD',
             '#D4A5A5', '#9B59B6', '#3498DB', '#E67E22', '#2ECC71'
         ];
+
+        // Load settings
+        const settings = JSON.parse(localStorage.getItem('fingerGameSettings')) || {
+            sound: true,
+            confetti: true,
+            theme: 'default',
+            speed: 5000
+        };
+
+        soundToggle.checked = settings.sound;
+        confettiToggle.checked = settings.confetti;
+        themeToggle.checked = settings.theme === 'dark';
+        speedSelect.value = settings.speed || 5000;
+
+        if (settings.theme === 'dark') {
+            document.body.classList.add('dark-theme');
+        } else if (settings.theme === 'light') {
+            document.body.classList.add('light-theme');
+        }
+
+        // Audio Context for sound effects
+        let audioContext = null;
+        function initAudio() {
+            if (!audioContext) {
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            }
+        }
+
+        function playSound(frequency = 440, duration = 100, type = 'sine') {
+            if (!soundToggle.checked || !audioContext) return;
+            try {
+                initAudio();
+                const oscillator = audioContext.createOscillator();
+                const gainNode = audioContext.createGain();
+                
+                oscillator.connect(gainNode);
+                gainNode.connect(audioContext.destination);
+                
+                oscillator.frequency.value = frequency;
+                oscillator.type = type;
+                
+                gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + duration / 1000);
+                
+                oscillator.start(audioContext.currentTime);
+                oscillator.stop(audioContext.currentTime + duration / 1000);
+            } catch (e) {
+                console.log('Audio error:', e);
+            }
+        }
+
+        function createConfetti() {
+            if (!confettiToggle.checked) return;
+            const colors = ['#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FFEEAD', '#FFD700'];
+            for (let i = 0; i < 50; i++) {
+                setTimeout(() => {
+                    const confetti = document.createElement('div');
+                    confetti.className = 'confetti';
+                    confetti.style.left = Math.random() * 100 + '%';
+                    confetti.style.background = colors[Math.floor(Math.random() * colors.length)];
+                    confetti.style.width = Math.random() * 10 + 5 + 'px';
+                    confetti.style.height = confetti.style.width;
+                    confetti.style.animationDelay = Math.random() * 0.5 + 's';
+                    document.body.appendChild(confetti);
+                    setTimeout(() => confetti.remove(), 3000);
+                }, i * 20);
+            }
+        }
 
         function showMessage(text, duration = 2000) {
             message.textContent = text;
@@ -284,13 +709,32 @@
             finger.textContent = fingers.length + 1;
             gameArea.appendChild(finger);
             fingers.push(finger);
+            fingerHistory.push({x, y, color: colors[fingers.length % colors.length]});
             fingerCount.textContent = fingers.length;
+            playSound(600, 50);
             return finger;
+        }
+
+        function undoLastFinger() {
+            if (fingers.length === 0) {
+                showMessage('Geri alınacak parmak yok!');
+                return;
+            }
+            if (isSelecting) {
+                showMessage('Seçim sırasında geri alınamaz!');
+                return;
+            }
+            fingers[fingers.length - 1].remove();
+            fingers.pop();
+            fingerHistory.pop();
+            fingerCount.textContent = fingers.length;
+            playSound(400, 50);
         }
 
         function resetGame() {
             fingers.forEach(finger => finger.remove());
             fingers = [];
+            fingerHistory = [];
             fingerCount.textContent = '0';
             document.getElementById('winnerInfo').textContent = '';
             isSelecting = false;
@@ -310,10 +754,11 @@
 
             isSelecting = true;
             startButton.disabled = true;
+            undoButton.disabled = true;
             let currentIndex = 0;
             let lastTime = 0;
             let startTime = null;
-            const SELECTION_DURATION = 5000; // 5 saniye
+            const SELECTION_DURATION = parseInt(speedSelect.value);
 
             function animate(time) {
                 if (!startTime) startTime = time;
@@ -323,12 +768,12 @@
                 if (!lastTime) lastTime = time;
                 const delta = time - lastTime;
 
-                // Hızı progress'e göre ayarla (başta hızlı, sonda yavaş)
                 const speed = 50 + (200 - 50) * progress;
 
                 if (delta > speed) {
                     fingers.forEach(f => f.classList.remove('winner', 'loser'));
                     fingers[currentIndex].classList.add('winner');
+                    playSound(300 + currentIndex * 50, 30);
                     currentIndex = (currentIndex + 1) % fingers.length;
                     lastTime = time;
                 }
@@ -344,9 +789,27 @@
                         }
                     }
 
-                    // Kazanan numaralarını göster
-                    const winnerInfo = document.getElementById('winnerInfo');
+                    // Update stats
+                    stats.totalGames++;
+                    stats.totalFingers += fingers.length;
+                    winners.forEach(index => {
+                        const fingerNum = index + 1;
+                        stats.fingerWins[fingerNum] = (stats.fingerWins[fingerNum] || 0) + 1;
+                    });
+                    localStorage.setItem('fingerGameStats', JSON.stringify(stats));
+
+                    // Save to history
                     const winnerNumbers = winners.map(index => index + 1).sort((a, b) => a - b);
+                    gameHistory.unshift({
+                        date: new Date().toLocaleString('tr-TR'),
+                        totalFingers: fingers.length,
+                        winners: winnerNumbers
+                    });
+                    if (gameHistory.length > 10) gameHistory.pop();
+                    localStorage.setItem('fingerGameHistory', JSON.stringify(gameHistory));
+
+                    // Show winners
+                    const winnerInfo = document.getElementById('winnerInfo');
                     winnerInfo.textContent = ` | Kazananlar: ${winnerNumbers.join(', ')}`;
 
                     fingers.forEach((finger, index) => {
@@ -360,13 +823,89 @@
                             finger.classList.add('loser');
                         }
                     });
+
+                    createConfetti();
+                    playSound(800, 500, 'sine');
+                    setTimeout(() => playSound(1000, 500, 'sine'), 200);
+
+                    isSelecting = false;
+                    startButton.disabled = false;
+                    undoButton.disabled = false;
                 }
             }
 
             animationFrame = requestAnimationFrame(animate);
         }
 
-        // Hem tıklama hem dokunma olaylarını ekle
+        function shareResults() {
+            const winnerInfo = document.getElementById('winnerInfo').textContent;
+            if (!winnerInfo) {
+                showMessage('Paylaşılacak sonuç yok!');
+                return;
+            }
+            const text = `Parmak Seçme Oyunu Sonuçları:\n${fingerCount.textContent} parmak arasından${winnerInfo}`;
+            if (navigator.share) {
+                navigator.share({
+                    title: 'Parmak Seçme Oyunu',
+                    text: text
+                });
+            } else {
+                navigator.clipboard.writeText(text).then(() => {
+                    showMessage('Sonuçlar panoya kopyalandı!');
+                });
+            }
+        }
+
+        function showStats() {
+            const statsContent = document.getElementById('statsContent');
+            const winRate = stats.totalGames > 0 
+                ? Object.values(stats.fingerWins).reduce((a, b) => a + b, 0) / stats.totalGames 
+                : 0;
+            
+            statsContent.innerHTML = `
+                <div class="stat-item">
+                    <strong>Toplam Oyun:</strong> ${stats.totalGames}
+                </div>
+                <div class="stat-item">
+                    <strong>Toplam Parmak:</strong> ${stats.totalFingers}
+                </div>
+                <div class="stat-item">
+                    <strong>Ortalama Parmak/Oyun:</strong> ${stats.totalGames > 0 ? (stats.totalFingers / stats.totalGames).toFixed(1) : 0}
+                </div>
+                <div class="stat-item">
+                    <strong>Toplam Kazanma:</strong> ${Object.values(stats.fingerWins).reduce((a, b) => a + b, 0)}
+                </div>
+                <hr style="margin: 15px 0; border: none; border-top: 1px solid rgba(0,0,0,0.1);">
+                <h3 style="margin-top: 15px;">Parmak Kazanma İstatistikleri:</h3>
+                ${Object.keys(stats.fingerWins).sort((a, b) => stats.fingerWins[b] - stats.fingerWins[a]).map(num => `
+                    <div class="stat-item">
+                        Parmak #${num}: ${stats.fingerWins[num]} kazanma (${((stats.fingerWins[num] / Object.values(stats.fingerWins).reduce((a, b) => a + b, 0)) * 100).toFixed(1)}%)
+                    </div>
+                `).join('') || '<p>Henüz istatistik yok</p>'}
+            `;
+            document.getElementById('statsModal').classList.add('show');
+        }
+
+        function showHistory() {
+            const historyContent = document.getElementById('historyContent');
+            if (gameHistory.length === 0) {
+                historyContent.innerHTML = '<p>Henüz geçmiş kayıt yok</p>';
+            } else {
+                historyContent.innerHTML = gameHistory.map(game => `
+                    <div class="history-item">
+                        <strong>${game.date}</strong><br>
+                        ${game.totalFingers} parmak - Kazananlar: ${game.winners.join(', ')}
+                    </div>
+                `).join('');
+            }
+            document.getElementById('historyModal').classList.add('show');
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).classList.remove('show');
+        }
+
+        // Event Listeners
         gameArea.addEventListener('click', handleInteraction);
         gameArea.addEventListener('touchstart', handleInteraction, { passive: false });
         gameArea.addEventListener('touchmove', handleInteraction, { passive: false });
@@ -393,7 +932,6 @@
             const relativeX = x - rect.left;
             const relativeY = y - rect.top;
 
-            // Parmak ekleme işlemini sadece boş alana tıklandığında yap
             if (!e.target.classList.contains('finger')) {
                 createFinger(relativeX, relativeY);
             }
@@ -408,6 +946,72 @@
         });
 
         resetButton.addEventListener('click', resetGame);
+        undoButton.addEventListener('click', undoLastFinger);
+        shareButton.addEventListener('click', shareResults);
+        settingsButton.addEventListener('click', () => {
+            settingsPanel.classList.toggle('show');
+        });
+        statsButton.addEventListener('click', showStats);
+        historyButton.addEventListener('click', showHistory);
+
+        // Settings
+        soundToggle.addEventListener('change', () => {
+            settings.sound = soundToggle.checked;
+            localStorage.setItem('fingerGameSettings', JSON.stringify(settings));
+        });
+
+        confettiToggle.addEventListener('change', () => {
+            settings.confetti = confettiToggle.checked;
+            localStorage.setItem('fingerGameSettings', JSON.stringify(settings));
+        });
+
+        themeToggle.addEventListener('change', () => {
+            document.body.classList.remove('dark-theme', 'light-theme');
+            if (themeToggle.checked) {
+                document.body.classList.add('dark-theme');
+                settings.theme = 'dark';
+            } else {
+                document.body.classList.add('light-theme');
+                settings.theme = 'light';
+            }
+            localStorage.setItem('fingerGameSettings', JSON.stringify(settings));
+        });
+
+        speedSelect.addEventListener('change', () => {
+            settings.speed = parseInt(speedSelect.value);
+            localStorage.setItem('fingerGameSettings', JSON.stringify(settings));
+        });
+
+        // Keyboard shortcuts
+        document.addEventListener('keydown', (e) => {
+            if (e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT') return;
+            
+            if (e.code === 'Space' && !isSelecting && fingers.length > 0) {
+                e.preventDefault();
+                selectWinners();
+            } else if (e.code === 'KeyR' && !isSelecting) {
+                e.preventDefault();
+                resetGame();
+            } else if (e.code === 'KeyU' && !isSelecting) {
+                e.preventDefault();
+                undoLastFinger();
+            } else if (e.code === 'KeyS') {
+                e.preventDefault();
+                settingsPanel.classList.toggle('show');
+            }
+        });
+
+        // Close modals on outside click
+        window.addEventListener('click', (e) => {
+            if (e.target.classList.contains('modal')) {
+                e.target.classList.remove('show');
+            }
+        });
+
+        // Initialize audio on first user interaction
+        document.addEventListener('click', () => {
+            initAudio();
+        }, { once: true });
     </script>
 </body>
-</html> 
+</html>
